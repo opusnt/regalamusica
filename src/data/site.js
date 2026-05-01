@@ -83,21 +83,21 @@ export const examples = [
     story: "Una familia quiso agradecer a su madre por años de esfuerzo, humor y cariño.",
     style: "Balada cálida",
     audioSrc: "/gracias-por-tanto-mama.mp3",
-    coverSrc: "/covers/para-mama-60.svg",
+    coverSrc: "/covers/para-mama-60.png",
   },
   {
     title: "Nuestra primera casa",
     occasion: "Aniversario",
     story: "Una pareja quiso recordar sus inicios, sus mudanzas y los pequeños rituales que los unieron.",
     style: "Pop acústico",
-    coverSrc: "/covers/nuestra-primera-casa.svg",
+    coverSrc: "/covers/nuestra-primera-casa.png",
   },
   {
     title: "La canción de los amigos",
     occasion: "Cumpleaños divertido",
     story: "Un grupo de amigos convirtió sus tallas internas en una canción alegre y memorable.",
     style: "Pop latino alegre",
-    coverSrc: "/covers/cancion-amigos.svg",
+    coverSrc: "/covers/cancion-amigos.png",
   },
 ];
 
