@@ -1,0 +1,12 @@
+{
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/api/orders/:id", "destination": "/api/orders?id=:id" },
+    { "source": "/checkout", "destination": "/index.html" },
+    { "source": "/success", "destination": "/index.html" },
+    { "source": "/cancelled", "destination": "/index.html" },
+    { "source": "/order/:id", "destination": "/index.html" },
+    { "source": "/admin/orders", "destination": "/index.html" }
+  ]
+}
