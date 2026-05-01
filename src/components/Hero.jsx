@@ -76,7 +76,7 @@ function MessageToMusicCard({ rotateX, rotateY, visualY }) {
       style={{ rotateX, rotateY, y: visualY }}
       animate={{ translateY: [0, -14, 0] }}
       transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-      className="hero-card-3d relative mx-auto aspect-[0.92] w-full max-w-[520px]"
+      className="hero-card-3d relative mx-auto aspect-[0.9] w-full max-w-[500px]"
     >
       <div className="absolute -inset-12 rounded-full bg-primary/18 blur-3xl" aria-hidden="true" />
       <div className="absolute -bottom-8 left-1/2 h-24 w-3/4 -translate-x-1/2 rounded-full bg-accent/12 blur-3xl" aria-hidden="true" />
@@ -304,7 +304,7 @@ export default function Hero() {
           variants={fadeScale}
           initial="hidden"
           animate="visible"
-          className="relative z-10 min-h-[520px] lg:min-h-[660px]"
+          className="relative z-10 min-h-[500px] lg:min-h-[600px]"
         >
           <FloatingNotes />
           <MessageToMusicCard rotateX={rotateX} rotateY={rotateY} visualY={visualY} />
