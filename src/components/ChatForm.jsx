@@ -8,6 +8,8 @@ export default function ChatForm() {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [draft, setDraft] = useState("");
+  const [customOptionDraft, setCustomOptionDraft] = useState("");
+  const [showCustomOption, setShowCustomOption] = useState(false);
   const activeStep = formSteps[stepIndex];
   const completed = stepIndex >= formSteps.length;
 
@@ -29,7 +31,19 @@ export default function ChatForm() {
     if (!cleanValue) return;
     setAnswers((current) => ({ ...current, [activeStep.id]: cleanValue }));
     setDraft("");
+    setCustomOptionDraft("");
+    setShowCustomOption(false);
     setStepIndex((current) => current + 1);
+  };
+
+  const handleOptionClick = (option) => {
+    if (activeStep?.allowCustom && option === "Otro") {
+      setShowCustomOption(true);
+      setCustomOptionDraft("");
+      return;
+    }
+
+    saveAnswer(option);
   };
 
   return (
@@ -99,17 +113,47 @@ export default function ChatForm() {
                   </div>
 
                   {activeStep.type === "options" ? (
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                      {activeStep.options.map((option) => (
-                        <button
-                          key={option}
-                          type="button"
-                          onClick={() => saveAnswer(option)}
-                          className="min-h-12 rounded-md border border-soft/12 bg-[#151515] px-3 py-3 text-sm font-semibold text-soft transition-colors duration-300 hover:border-accent hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-night"
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        {activeStep.options.map((option) => (
+                          <button
+                            key={option}
+                            type="button"
+                            onClick={() => handleOptionClick(option)}
+                            className={`min-h-12 rounded-md border px-3 py-3 text-sm font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-night ${
+                              showCustomOption && option === "Otro"
+                                ? "border-accent bg-accent/10 text-accent"
+                                : "border-soft/12 bg-[#151515] text-soft hover:border-accent hover:text-accent"
+                            }`}
+                          >
+                            {option}
+                          </button>
+                        ))}
+                      </div>
+
+                      {showCustomOption ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="grid gap-2 sm:grid-cols-[1fr_auto]"
                         >
-                          {option}
-                        </button>
-                      ))}
+                          <input
+                            value={customOptionDraft}
+                            onChange={(event) => setCustomOptionDraft(event.target.value)}
+                            placeholder={activeStep.customPlaceholder}
+                            className="min-h-12 rounded-md border border-soft/12 bg-[#151515] px-4 py-3 text-base text-soft outline-none transition-colors duration-300 placeholder:text-soft/34 focus:border-accent"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => saveAnswer(customOptionDraft)}
+                            disabled={!customOptionDraft.trim()}
+                            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-accent px-5 py-3 text-base font-semibold text-night transition-colors duration-300 hover:bg-[#ffd46a] disabled:cursor-not-allowed disabled:opacity-45"
+                          >
+                            Continuar
+                            <Send className="size-4" aria-hidden="true" />
+                          </button>
+                        </motion.div>
+                      ) : null}
                     </div>
                   ) : (
                     <div className="space-y-3">
