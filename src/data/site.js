@@ -82,7 +82,7 @@ export const examples = [
     occasion: "Cumpleaños",
     story: "Una familia quiso agradecer a su madre por años de esfuerzo, humor y cariño.",
     style: "Balada cálida",
-    audioSrc: "/gracias-por-tanto-mama.mp3",
+    audioSrc: "/por-todas-las%20veces.mp3",
     coverSrc: "/covers/para-mama-60.png",
   },
   {
