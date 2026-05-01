@@ -3,7 +3,7 @@ import { Pause, Play, Volume2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { storyLines } from "../content.js";
 
-const STORY_AUDIO_SRC = "/Gracias%20por%20tanto%20mama%CC%81.mp3";
+const STORY_AUDIO_SRC = "/gracias-por-tanto-mama.mp3";
 
 const formatTime = (seconds) => {
   if (!Number.isFinite(seconds)) return "0:00";
