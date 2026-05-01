@@ -3,6 +3,7 @@ import { Gift, Music2, Pause, Play, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import CTAButton from "./CTAButton.jsx";
 import { analyticsEvents, trackEvent } from "../lib/analytics.js";
+import { pauseOtherAudioElements } from "../lib/audio.js";
 import { fadeScale, fadeUp, stagger } from "../motion.js";
 
 const heroAudioSrc = "/gracias-por-tanto-mama.mp3";
@@ -23,11 +24,13 @@ export default function LandingHero() {
 
     audio.addEventListener("timeupdate", syncTime);
     audio.addEventListener("loadedmetadata", syncDuration);
+    audio.addEventListener("pause", stop);
     audio.addEventListener("ended", stop);
 
     return () => {
       audio.removeEventListener("timeupdate", syncTime);
       audio.removeEventListener("loadedmetadata", syncDuration);
+      audio.removeEventListener("pause", stop);
       audio.removeEventListener("ended", stop);
     };
   }, []);
@@ -43,6 +46,7 @@ export default function LandingHero() {
     }
 
     try {
+      pauseOtherAudioElements(audio);
       await audio.play();
       setIsPlaying(true);
     } catch {

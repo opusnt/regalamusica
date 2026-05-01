@@ -3,6 +3,7 @@ import { Check, ChevronDown, Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { examples, faqs, occasions, plans, trustBenefits } from "../data/site.js";
 import { analyticsEvents, trackEvent } from "../lib/analytics.js";
+import { pauseOtherAudioElements } from "../lib/audio.js";
 import { fadeUp, stagger } from "../motion.js";
 import SectionIntro from "./SectionIntro.jsx";
 
@@ -79,11 +80,13 @@ export function ExamplesSection() {
 
     audio.addEventListener("timeupdate", syncTime);
     audio.addEventListener("loadedmetadata", syncDuration);
+    audio.addEventListener("pause", stop);
     audio.addEventListener("ended", stop);
 
     return () => {
       audio.removeEventListener("timeupdate", syncTime);
       audio.removeEventListener("loadedmetadata", syncDuration);
+      audio.removeEventListener("pause", stop);
       audio.removeEventListener("ended", stop);
     };
   }, []);
@@ -108,6 +111,12 @@ export function ExamplesSection() {
     }
 
     try {
+      pauseOtherAudioElements(audio);
+      audio.pause();
+      audio.src = example.audioSrc;
+      audio.load();
+      setCurrentTime(0);
+      setDuration(0);
       await audio.play();
       setPlayingIndex(index);
     } catch {
@@ -117,7 +126,7 @@ export function ExamplesSection() {
 
   return (
     <section id="ejemplos" className="bg-[#0f0f0f] px-5 py-16 sm:px-8 sm:py-24">
-      <audio ref={audioRef} src={examples[0].audioSrc} preload="metadata" />
+      <audio ref={audioRef} preload="metadata" />
       <div className="mx-auto max-w-7xl">
         <SectionIntro
           eyebrow="Ejemplos"

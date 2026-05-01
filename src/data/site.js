@@ -90,6 +90,7 @@ export const examples = [
     occasion: "Aniversario",
     story: "Una pareja quiso recordar sus inicios, sus mudanzas y los pequeños rituales que los unieron.",
     style: "Pop acústico",
+    audioSrc: "/todavia-me-acuerdo.mp3",
     coverSrc: "/covers/nuestra-primera-casa.png",
   },
   {
@@ -97,6 +98,7 @@ export const examples = [
     occasion: "Cumpleaños divertido",
     story: "Un grupo de amigos convirtió sus tallas internas en una canción alegre y memorable.",
     style: "Pop latino alegre",
+    audioSrc: "/la-misma-mesa.mp3",
     coverSrc: "/covers/cancion-amigos.png",
   },
 ];
