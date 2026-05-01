@@ -1,12 +1,61 @@
 import { motion } from "framer-motion";
-import { Gift, Music2, Play, Sparkles } from "lucide-react";
+import { Gift, Music2, Pause, Play, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import CTAButton from "./CTAButton.jsx";
 import { analyticsEvents, trackEvent } from "../lib/analytics.js";
 import { fadeScale, fadeUp, stagger } from "../motion.js";
 
+const heroAudioSrc = "/gracias-por-tanto-mama.mp3";
+
 export default function LandingHero() {
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return undefined;
+
+    const syncTime = () => setCurrentTime(audio.currentTime);
+    const syncDuration = () => setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
+    const stop = () => setIsPlaying(false);
+
+    audio.addEventListener("timeupdate", syncTime);
+    audio.addEventListener("loadedmetadata", syncDuration);
+    audio.addEventListener("ended", stop);
+
+    return () => {
+      audio.removeEventListener("timeupdate", syncTime);
+      audio.removeEventListener("loadedmetadata", syncDuration);
+      audio.removeEventListener("ended", stop);
+    };
+  }, []);
+
+  const toggleHeroAudio = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+      return;
+    }
+
+    try {
+      await audio.play();
+      setIsPlaying(true);
+    } catch {
+      setIsPlaying(false);
+    }
+  };
+
+  const progress = duration ? `${Math.min(100, (currentTime / duration) * 100)}%` : "0%";
+  const PlayerIcon = isPlaying ? Pause : Play;
+
   return (
     <section id="inicio" className="relative isolate overflow-hidden bg-night px-5 pb-16 pt-28 sm:px-8 lg:pt-24">
+      <audio ref={audioRef} src={heroAudioSrc} preload="metadata" />
       <div className="absolute inset-0 -z-10">
         <div className="hero-mesh absolute inset-0" aria-hidden="true" />
         <div className="hero-noise absolute inset-0" aria-hidden="true" />
@@ -78,7 +127,7 @@ export default function LandingHero() {
 
         <motion.div variants={fadeScale} initial="hidden" animate="visible" className="relative">
           <div className="absolute inset-8 rounded-full bg-primary/20 blur-3xl" aria-hidden="true" />
-          <div className="relative mx-auto max-w-[560px] rounded-lg border border-soft/14 bg-primary/10 p-5 shadow-[0_34px_110px_rgba(63,105,175,0.24)] backdrop-blur-2xl sm:p-6">
+          <div className="relative mx-auto max-w-[520px] rounded-lg border border-soft/14 bg-primary/10 p-5 shadow-[0_34px_110px_rgba(63,105,175,0.24)] backdrop-blur-2xl sm:p-6">
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase text-accent">Regalo musical</p>
@@ -89,18 +138,34 @@ export default function LandingHero() {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-[0.72fr_1.28fr]">
-              <div className="aspect-square rounded-lg border border-soft/12 bg-gradient-to-br from-primary/80 via-[#1b2430] to-night p-4">
-                <Sparkles className="size-7 text-accent" aria-hidden="true" />
-                <p className="mt-16 text-lg font-semibold leading-tight text-soft">Gracias por todo lo que nunca supe decir.</p>
+            <div className="space-y-4">
+              <div className="rounded-lg border border-soft/12 bg-gradient-to-br from-primary/80 via-[#1b2430] to-night p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <Sparkles className="size-7 text-accent" aria-hidden="true" />
+                  <p className="rounded-md bg-night/42 px-3 py-1 text-xs font-semibold uppercase text-soft/60">
+                    Historia original
+                  </p>
+                </div>
+                <p className="mt-16 max-w-sm text-2xl font-semibold leading-tight text-soft">
+                  Gracias por todo lo que nunca supe decir.
+                </p>
               </div>
+
               <div className="rounded-lg border border-soft/10 bg-night/62 p-4">
-                <p className="text-sm text-soft/52">De historia a canción</p>
-                <div className="mt-5 flex h-28 items-end gap-1.5">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm text-soft/52">De historia a canción</p>
+                    <p className="mt-1 text-lg font-semibold text-soft">Gracias por tanto mamá</p>
+                  </div>
+                  <span className="rounded-md bg-primary/20 px-3 py-1 text-xs font-semibold text-accent">
+                    Balada cálida
+                  </span>
+                </div>
+                <div className="mt-5 flex h-24 items-end gap-1.5">
                   {Array.from({ length: 26 }).map((_, index) => (
                     <motion.span
                       key={index}
-                      className="w-full rounded-sm bg-gradient-to-t from-primary to-accent"
+                      className={`w-full rounded-sm bg-gradient-to-t ${isPlaying ? "from-primary to-accent" : "from-primary/60 to-accent/70"}`}
                       animate={{ height: [`${24 + (index % 5) * 8}%`, `${42 + Math.abs(Math.sin(index)) * 48}%`, `${28 + (index % 7) * 6}%`] }}
                       transition={{ duration: 1.8, delay: index * 0.03, repeat: Infinity, repeatType: "mirror" }}
                     />
@@ -108,13 +173,18 @@ export default function LandingHero() {
                 </div>
                 <div className="mt-5 rounded-md border border-soft/10 bg-soft/5 p-3">
                   <div className="flex items-center gap-3">
-                    <button className="grid size-10 place-items-center rounded-md bg-accent text-night" type="button" aria-label="Reproducir muestra">
-                      <Play className="size-5" fill="currentColor" aria-hidden="true" />
+                    <button
+                      onClick={toggleHeroAudio}
+                      className="grid size-10 shrink-0 place-items-center rounded-md bg-accent text-night"
+                      type="button"
+                      aria-label={`${isPlaying ? "Pausar" : "Reproducir"} Gracias por tanto mamá`}
+                    >
+                      <PlayerIcon className="size-5" fill={isPlaying ? "none" : "currentColor"} aria-hidden="true" />
                     </button>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-soft">Una canción creada desde tu historia</p>
-                      <div className="mt-2 h-1.5 rounded-sm bg-soft/10">
-                        <div className="h-full w-2/3 rounded-sm bg-accent" />
+                      <div className="mt-2 h-1.5 overflow-hidden rounded-sm bg-soft/10">
+                        <div className="h-full rounded-sm bg-accent transition-[width] duration-300" style={{ width: progress }} />
                       </div>
                     </div>
                   </div>
