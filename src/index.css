@@ -59,6 +59,33 @@ textarea {
   mix-blend-mode: normal;
 }
 
+.hero-mesh {
+  background:
+    radial-gradient(ellipse at 68% 42%, rgba(63, 105, 175, 0.36) 0%, rgba(63, 105, 175, 0.16) 28%, transparent 58%),
+    radial-gradient(ellipse at 82% 74%, rgba(245, 188, 54, 0.16) 0%, transparent 42%),
+    radial-gradient(ellipse at 16% 24%, rgba(63, 105, 175, 0.2) 0%, transparent 48%),
+    linear-gradient(135deg, #0b0b0b 0%, #101419 42%, #0b0b0b 100%);
+}
+
+.hero-noise {
+  opacity: 0.18;
+  background-image:
+    linear-gradient(rgba(245, 245, 245, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 245, 245, 0.02) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+.hero-card-3d {
+  transform-style: preserve-3d;
+  perspective: 1200px;
+}
+
+.hero-card-sheen {
+  background:
+    linear-gradient(135deg, rgba(245, 245, 245, 0.16) 0%, transparent 28%),
+    linear-gradient(155deg, rgba(63, 105, 175, 0.42) 0%, rgba(11, 11, 11, 0.1) 42%, rgba(245, 188, 54, 0.08) 100%);
+}
+
 .story-backdrop {
   background:
     linear-gradient(120deg, rgba(63, 105, 175, 0.12), rgba(245, 188, 54, 0.07)),
