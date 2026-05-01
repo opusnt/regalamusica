@@ -4,10 +4,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        night: "#0B0B0B",
-        primary: "#3F69AF",
+        night: "#080A0F",
+        primary: "#2F65B8",
         accent: "#F5BC36",
-        soft: "#F5F5F5",
+        soft: "#F7F7F7",
       },
       fontFamily: {
         sans: ["Inter", "Manrope", "ui-sans-serif", "system-ui", "sans-serif"],

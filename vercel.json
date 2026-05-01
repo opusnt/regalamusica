@@ -3,10 +3,14 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/orders/:id", "destination": "/api/orders?id=:id" },
+    { "source": "/crear", "destination": "/index.html" },
+    { "source": "/create-song", "destination": "/index.html" },
     { "source": "/checkout", "destination": "/index.html" },
     { "source": "/success", "destination": "/index.html" },
     { "source": "/cancelled", "destination": "/index.html" },
     { "source": "/order/:id", "destination": "/index.html" },
+    { "source": "/regalo/:slug", "destination": "/index.html" },
+    { "source": "/admin/orders/:id", "destination": "/index.html" },
     { "source": "/admin/orders", "destination": "/index.html" }
   ]
 }

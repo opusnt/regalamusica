@@ -1,8 +1,11 @@
 import { useEffect } from "react";
 import LandingHero from "./components/LandingHero.jsx";
 import {
+  B2BSection,
+  BeforeAfterSection,
   ExamplesSection,
   FAQSection,
+  GuaranteeSection,
   HowItWorksSection,
   OccasionsSection,
   PricingSection,
@@ -12,7 +15,10 @@ import {
 import SongWizard from "./components/SongWizard.jsx";
 import {
   AdminOrdersPage,
+  AdminOrderDetailPage,
   CancelledPage,
+  CheckoutPage,
+  GiftPage,
   OrderDetailPage,
   SuccessPage,
 } from "./components/OrderPages.jsx";
@@ -29,8 +35,11 @@ function HomePage() {
       <HowItWorksSection />
       <OccasionsSection />
       <ExamplesSection />
+      <BeforeAfterSection />
       <PricingSection />
       <TrustSection />
+      <GuaranteeSection />
+      <B2BSection />
       <FAQSection />
       <SiteFooter />
     </main>
@@ -40,11 +49,14 @@ function HomePage() {
 export default function App() {
   const { pathname } = window.location;
 
-  if (pathname === "/checkout") return <SongWizard />;
+  if (pathname === "/crear" || pathname === "/create-song") return <SongWizard />;
+  if (pathname === "/checkout") return <CheckoutPage />;
   if (pathname === "/success") return <SuccessPage />;
   if (pathname === "/cancelled") return <CancelledPage />;
+  if (pathname.startsWith("/admin/orders/")) return <AdminOrderDetailPage />;
   if (pathname === "/admin/orders") return <AdminOrdersPage />;
   if (pathname.startsWith("/order/")) return <OrderDetailPage />;
+  if (pathname.startsWith("/regalo/")) return <GiftPage />;
 
   return <HomePage />;
 }

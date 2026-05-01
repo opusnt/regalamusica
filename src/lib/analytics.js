@@ -17,9 +17,13 @@ export const analyticsEvents = {
   completeStep1: "complete_step_1",
   completeStep2: "complete_step_2",
   completeStep3: "complete_step_3",
+  completeStep4: "complete_step_4",
+  completeStep5: "complete_step_5",
   selectPlan: "select_plan",
   beginCheckout: "begin_checkout",
   paymentSuccess: "payment_success",
   paymentCancelled: "payment_cancelled",
   submitOrder: "submit_order",
+  clickWhatsapp: "click_whatsapp",
+  clickB2bContact: "click_b2b_contact",
 };

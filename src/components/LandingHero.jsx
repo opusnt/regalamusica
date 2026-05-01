@@ -7,6 +7,12 @@ import { pauseOtherAudioElements } from "../lib/audio.js";
 import { fadeScale, fadeUp, stagger } from "../motion.js";
 
 const heroAudioSrc = "/gracias-por-tanto-mama.mp3";
+const heroHighlights = [
+  "Desde $19.990",
+  "Entrega digital",
+  "Cumpleaños, aniversarios y fechas especiales",
+  "Canción creada desde tu historia",
+];
 
 export default function LandingHero() {
   const audioRef = useRef(null);
@@ -81,7 +87,7 @@ export default function LandingHero() {
             <a href="#faq" className="hover:text-accent">FAQ</a>
           </nav>
           <a
-            href="/checkout"
+            href="/crear"
             onClick={() => trackEvent(analyticsEvents.clickCreateSong, { location: "nav" })}
             className="hidden rounded-md border border-soft/15 px-4 py-2 text-sm font-semibold text-soft/88 transition-colors duration-300 hover:border-accent/70 hover:text-accent sm:inline-flex"
           >
@@ -97,7 +103,7 @@ export default function LandingHero() {
             className="mb-6 inline-flex items-center gap-2 rounded-md border border-soft/12 bg-night/45 px-3 py-2 text-sm text-soft/76 backdrop-blur-md"
           >
             <span className="size-2 rounded-sm bg-accent shadow-amber" aria-hidden="true" />
-            Canciones personalizadas para regalar en momentos únicos
+            Regalos musicales personalizados
           </motion.p>
 
           <motion.h1
@@ -110,11 +116,11 @@ export default function LandingHero() {
             variants={fadeUp}
             className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-soft/72 sm:text-xl"
           >
-            Creamos canciones personalizadas para regalar en cumpleaños, aniversarios, matrimonios y momentos importantes. Tú nos cuentas la historia, eliges el estilo y nosotros la transformamos en una canción lista para emocionar.
+            Cuéntanos los recuerdos, frases y momentos importantes. Nosotros los transformamos en una canción personalizada, lista para regalar y emocionar.
           </motion.p>
 
           <motion.div variants={fadeUp} className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <CTAButton href="/checkout" onClick={() => trackEvent(analyticsEvents.clickCreateSong, { location: "hero" })}>
+            <CTAButton href="/crear" onClick={() => trackEvent(analyticsEvents.clickCreateSong, { location: "hero" })}>
               Crear mi canción
             </CTAButton>
             <motion.a
@@ -127,6 +133,16 @@ export default function LandingHero() {
               Escuchar ejemplos
             </motion.a>
           </motion.div>
+          <motion.p variants={fadeUp} className="mt-5 text-sm font-semibold text-soft/62">
+            Canciones personalizadas · Entrega digital · Ajustes según plan
+          </motion.p>
+          <motion.div variants={fadeUp} className="mt-5 grid gap-2 sm:grid-cols-2">
+            {heroHighlights.map((highlight) => (
+              <div key={highlight} className="rounded-md border border-soft/10 bg-soft/[0.04] px-3 py-2 text-sm text-soft/72">
+                {highlight}
+              </div>
+            ))}
+          </motion.div>
         </motion.div>
 
         <motion.div variants={fadeScale} initial="hidden" animate="visible" className="relative">
@@ -135,7 +151,7 @@ export default function LandingHero() {
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase text-accent">Regalo musical</p>
-                <h2 className="mt-1 text-2xl font-semibold text-soft">Canción para mamá</h2>
+                <h2 className="mt-1 text-2xl font-semibold text-soft">Una historia hecha canción</h2>
               </div>
               <div className="grid size-12 place-items-center rounded-md bg-accent text-night shadow-amber">
                 <Gift className="size-6" aria-hidden="true" />
@@ -146,20 +162,18 @@ export default function LandingHero() {
               <div className="rounded-lg border border-soft/12 bg-gradient-to-br from-primary/80 via-[#1b2430] to-night p-5">
                 <div className="flex items-start justify-between gap-4">
                   <Sparkles className="size-7 text-accent" aria-hidden="true" />
-                  <p className="rounded-md bg-night/42 px-3 py-1 text-xs font-semibold uppercase text-soft/60">
-                    Historia original
-                  </p>
+                  <p className="rounded-md bg-night/42 px-3 py-1 text-xs font-semibold uppercase text-soft/60">Historia original</p>
                 </div>
                 <p className="mt-16 max-w-sm text-2xl font-semibold leading-tight text-soft">
-                  Gracias por todo lo que nunca supe decir.
+                  “Gracias por todo lo que nunca supe decir.”
                 </p>
               </div>
 
               <div className="rounded-lg border border-soft/10 bg-night/62 p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm text-soft/52">De historia a canción</p>
-                    <p className="mt-1 text-lg font-semibold text-soft">Gracias por tanto mamá</p>
+                    <p className="text-sm text-soft/52">De recuerdo a música</p>
+                    <p className="mt-1 text-lg font-semibold text-soft">Lista para regalar</p>
                   </div>
                   <span className="rounded-md bg-primary/20 px-3 py-1 text-xs font-semibold text-accent">
                     Balada cálida

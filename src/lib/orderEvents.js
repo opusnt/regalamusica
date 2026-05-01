@@ -23,10 +23,11 @@ export function onOrderDelivered(order) {
 }
 
 export const futureEmails = [
-  "Confirmación de pedido",
+  "Pedido recibido",
   "Pago confirmado",
   "Producción iniciada",
   "Canción lista",
-  "Solicitud de feedback",
-  "Recordatorio de formulario abandonado",
+  "Ajuste solicitado",
+  "Pedido entregado",
+  "Formulario abandonado",
 ];

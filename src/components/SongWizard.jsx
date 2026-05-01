@@ -1,5 +1,4 @@
-import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, CreditCard, Lock } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Gift, Lock } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   musicStyles,
@@ -28,18 +27,15 @@ const initialDraft = {
   musicStyle: "",
   references: "",
   selectedPlan: "premium",
-  cardNumber: "",
-  expiry: "",
-  cvc: "",
 };
 
 const steps = [
-  "Datos básicos",
-  "Datos del regalo",
+  "Datos del comprador",
+  "Persona y ocasión",
   "Historia",
   "Tono y estilo",
-  "Plan",
-  "Resumen y pago",
+  "Elegir plan",
+  "Resumen",
 ];
 
 const formatPrice = (amount) =>
@@ -62,7 +58,17 @@ export default function SongWizard() {
 
   useEffect(() => {
     const saved = localStorage.getItem(storageKey);
-    if (saved) setDraft({ ...initialDraft, ...JSON.parse(saved) });
+    const params = new URLSearchParams(window.location.search);
+    const queryDraft = {
+      selectedPlan: params.get("plan") || undefined,
+      occasion: params.get("occasion") || undefined,
+    };
+    const cleanQueryDraft = Object.fromEntries(Object.entries(queryDraft).filter(([, value]) => value));
+    if (saved) {
+      setDraft({ ...initialDraft, ...JSON.parse(saved), ...cleanQueryDraft });
+    } else {
+      setDraft({ ...initialDraft, ...cleanQueryDraft });
+    }
     trackEvent(analyticsEvents.startForm);
   }, []);
 
@@ -97,19 +103,19 @@ export default function SongWizard() {
       if (!draft.tone.trim()) nextErrors.tone = "Selecciona un tono.";
       if (!draft.musicStyle.trim() || draft.musicStyle === "Otro") nextErrors.musicStyle = "Selecciona o escribe un estilo.";
     }
-    if (stepIndex === 5) {
-      const cardNumber = draft.cardNumber.replace(/\D/g, "");
-      if (cardNumber.length < 12) nextErrors.cardNumber = "Revisa el número de tarjeta.";
-      if (!/^\d{2}\/\d{2}$/.test(draft.expiry)) nextErrors.expiry = "Usa formato MM/AA.";
-      if (draft.cvc.replace(/\D/g, "").length < 3) nextErrors.cvc = "Revisa el CVC.";
-    }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
 
   const goNext = () => {
     if (!validateStep(step)) return;
-    const eventName = [analyticsEvents.completeStep1, analyticsEvents.completeStep2, analyticsEvents.completeStep3][step];
+    const eventName = [
+      analyticsEvents.completeStep1,
+      analyticsEvents.completeStep2,
+      analyticsEvents.completeStep3,
+      analyticsEvents.completeStep4,
+      analyticsEvents.completeStep5,
+    ][step];
     if (eventName) trackEvent(eventName);
     setStep((current) => Math.min(current + 1, steps.length - 1));
   };
@@ -117,7 +123,7 @@ export default function SongWizard() {
   const submitOrder = async () => {
     if (!validateStep(5)) return;
     setStatus("loading");
-    trackEvent(analyticsEvents.beginCheckout, { plan: selectedPlan.id });
+    trackEvent(analyticsEvents.submitOrder, { plan: selectedPlan.id });
 
     try {
       const response = await fetch("/api/orders", {
@@ -134,8 +140,8 @@ export default function SongWizard() {
       }
 
       localStorage.removeItem(storageKey);
-      trackEvent(analyticsEvents.paymentSuccess, { orderId: data.order.id, plan: data.order.selectedPlan });
-      window.location.href = `/success?order=${data.order.id}`;
+      trackEvent(analyticsEvents.beginCheckout, { orderId: data.order.id, plan: data.order.selectedPlan });
+      window.location.href = `/checkout?order=${data.order.id}`;
     } catch {
       setErrors({ general: "No pudimos conectar con el backend. Inténtalo nuevamente." });
       setStatus("error");
@@ -147,9 +153,10 @@ export default function SongWizard() {
       <div className="mx-auto max-w-6xl">
         <a href="/" className="text-sm font-semibold text-soft/62 hover:text-accent">Regala Música</a>
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.34fr_0.66fr]">
-          <aside className="rounded-lg border border-soft/10 bg-[#101010] p-5">
-            <p className="text-sm font-semibold uppercase text-accent">Crear canción</p>
-            <h1 className="mt-3 text-3xl font-semibold leading-tight text-soft">Cuéntanos la historia. Nosotros hacemos el resto.</h1>
+          <aside className="rounded-lg border border-soft/10 bg-[#10141e] p-5">
+            <p className="text-sm font-semibold uppercase text-accent">Constructor de regalo</p>
+            <h1 className="mt-3 text-3xl font-semibold leading-tight text-soft">No tienes que escribir una canción. Solo cuéntanos la historia.</h1>
+            <p className="mt-4 text-sm leading-6 text-soft/58">Guardamos tu avance en este navegador para que puedas volver atrás sin perder información.</p>
             <div className="mt-6 space-y-2">
               {steps.map((label, index) => (
                 <button
@@ -167,7 +174,7 @@ export default function SongWizard() {
             </div>
           </aside>
 
-          <section className="rounded-lg border border-soft/10 bg-[#101010] p-5 sm:p-7">
+          <section className="rounded-lg border border-soft/10 bg-[#10141e] p-5 sm:p-7">
             <div className="mb-6 h-1.5 rounded-sm bg-soft/10">
               <div className="h-full rounded-sm bg-accent transition-all duration-300" style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
             </div>
@@ -178,7 +185,7 @@ export default function SongWizard() {
               {step === 2 && <StoryStep draft={draft} update={update} errors={errors} />}
               {step === 3 && <StyleStep draft={draft} update={update} errors={errors} />}
               {step === 4 && <PlanStep draft={draft} update={update} selectedPlan={selectedPlan} />}
-              {step === 5 && <PaymentStep draft={draft} update={update} errors={errors} selectedPlan={selectedPlan} />}
+              {step === 5 && <SummaryStep draft={draft} selectedPlan={selectedPlan} />}
             </div>
             {errors.general ? <p className="mt-5 rounded-md bg-red-400/10 px-4 py-3 text-sm text-red-100">{errors.general}</p> : null}
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
@@ -196,7 +203,7 @@ export default function SongWizard() {
                 </button>
               ) : (
                 <button type="button" onClick={submitOrder} disabled={status === "loading"} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-accent px-5 py-3 font-semibold text-night hover:bg-[#ffd46a] disabled:opacity-55">
-                  {status === "loading" ? "Procesando..." : "Pagar y comenzar mi canción"} <Lock className="size-4" />
+                  {status === "loading" ? "Creando pedido..." : "Pagar y comenzar mi canción"} <Lock className="size-4" />
                 </button>
               )}
             </div>
@@ -209,16 +216,21 @@ export default function SongWizard() {
 
 function BasicStep({ draft, update, errors }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Nombre del comprador" error={errors.customerName}>
-        <input className="checkout-input" value={draft.customerName} onChange={(event) => update("customerName", event.target.value)} />
-      </Field>
-      <Field label="Email" error={errors.customerEmail}>
-        <input className="checkout-input" type="email" value={draft.customerEmail} onChange={(event) => update("customerEmail", event.target.value)} />
-      </Field>
-      <Field label="WhatsApp opcional">
-        <input className="checkout-input" value={draft.customerWhatsapp} onChange={(event) => update("customerWhatsapp", event.target.value)} />
-      </Field>
+    <div>
+      <p className="mb-5 rounded-md border border-soft/10 bg-night/50 p-4 text-sm leading-6 text-soft/64">
+        Usaremos estos datos para enviarte avances y la entrega final.
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Nombre" error={errors.customerName}>
+          <input className="checkout-input" value={draft.customerName} onChange={(event) => update("customerName", event.target.value)} />
+        </Field>
+        <Field label="Email" error={errors.customerEmail}>
+          <input className="checkout-input" type="email" value={draft.customerEmail} onChange={(event) => update("customerEmail", event.target.value)} />
+        </Field>
+        <Field label="WhatsApp opcional">
+          <input className="checkout-input" value={draft.customerWhatsapp} onChange={(event) => update("customerWhatsapp", event.target.value)} />
+        </Field>
+      </div>
     </div>
   );
 }
@@ -245,6 +257,9 @@ function GiftStep({ draft, update, errors }) {
 function StoryStep({ draft, update, errors }) {
   return (
     <div className="grid gap-4">
+      <p className="rounded-md border border-soft/10 bg-night/50 p-4 text-sm leading-6 text-soft/64">
+        No necesitas escribir perfecto. Mientras más detalles nos des, más personal será la canción.
+      </p>
       <Field label="¿Qué quieres contar en la canción?" error={errors.story}>
         <textarea className="checkout-input min-h-32 resize-none" value={draft.story} onChange={(event) => update("story", event.target.value)} />
       </Field>
@@ -281,7 +296,7 @@ function StyleStep({ draft, update, errors }) {
         ) : null}
       </Field>
       <Field label="Referencias opcionales">
-        <textarea className="checkout-input min-h-24 resize-none" value={draft.references} onChange={(event) => update("references", event.target.value)} placeholder="Artistas o canciones de inspiración. No copiamos canciones existentes." />
+        <textarea className="checkout-input min-h-24 resize-none" value={draft.references} onChange={(event) => update("references", event.target.value)} placeholder="Puedes compartir artistas o canciones como inspiración, pero no copiaremos obras existentes." />
       </Field>
     </div>
   );
@@ -308,11 +323,14 @@ function PlanStep({ draft, update, selectedPlan }) {
   );
 }
 
-function PaymentStep({ draft, update, errors, selectedPlan }) {
+function SummaryStep({ draft, selectedPlan }) {
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_0.85fr]">
       <div className="rounded-lg border border-soft/10 bg-night/60 p-4">
-        <h3 className="text-xl font-semibold text-soft">Resumen</h3>
+        <h3 className="flex items-center gap-2 text-xl font-semibold text-soft"><Gift className="size-5 text-accent" /> Resumen emocional</h3>
+        <p className="mt-4 text-base leading-7 text-soft/74">
+          Vamos a crear una canción para <strong>{draft.recipientName || "esa persona especial"}</strong>, por <strong>{draft.occasion || "un momento importante"}</strong>, con tono <strong>{draft.tone || "por definir"}</strong> y estilo <strong>{draft.musicStyle || "por definir"}</strong>, basada en tu historia.
+        </p>
         <dl className="mt-4 space-y-3 text-sm">
           {[
             ["Cliente", draft.customerName],
@@ -323,6 +341,7 @@ function PaymentStep({ draft, update, errors, selectedPlan }) {
             ["Estilo", draft.musicStyle],
             ["Plan", selectedPlan.name],
             ["Precio", formatPrice(selectedPlan.amount)],
+            ["Fecha estimada", estimateDeliveryLabel(selectedPlan.id)],
           ].map(([label, value]) => (
             <div key={label} className="flex justify-between gap-4 border-b border-soft/8 pb-2">
               <dt className="text-soft/46">{label}</dt>
@@ -332,23 +351,29 @@ function PaymentStep({ draft, update, errors, selectedPlan }) {
         </dl>
       </div>
       <div className="rounded-lg border border-soft/10 bg-night/60 p-4">
-        <h3 className="flex items-center gap-2 text-xl font-semibold text-soft"><CreditCard className="size-5 text-accent" /> Pago demo</h3>
-        <div className="mt-4 grid gap-4">
-          <Field label="Número de tarjeta" error={errors.cardNumber}>
-            <input className="checkout-input" value={draft.cardNumber} onChange={(event) => update("cardNumber", event.target.value)} placeholder="4242 4242 4242 4242" />
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Vencimiento" error={errors.expiry}>
-              <input className="checkout-input" value={draft.expiry} onChange={(event) => update("expiry", event.target.value)} placeholder="MM/AA" />
-            </Field>
-            <Field label="CVC" error={errors.cvc}>
-              <input className="checkout-input" value={draft.cvc} onChange={(event) => update("cvc", event.target.value)} placeholder="123" />
-            </Field>
-          </div>
-        </div>
+        <h3 className="text-xl font-semibold text-soft">{selectedPlan.name}</h3>
+        <p className="mt-2 text-3xl font-semibold text-accent">{selectedPlan.price}</p>
+        <p className="mt-4 text-sm leading-6 text-soft/64">{selectedPlan.description}</p>
+        <ul className="mt-5 space-y-3">
+          {selectedPlan.includes.map((item) => (
+            <li key={item} className="flex gap-2 text-sm leading-6 text-soft/72">
+              <Check className="mt-0.5 size-4 shrink-0 text-accent" />
+              {item}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-5 rounded-md border border-accent/25 bg-accent/10 p-3 text-sm leading-6 text-soft/70">
+          Al continuar, crearemos el pedido en estado de pago pendiente y te llevaremos al checkout.
+        </p>
       </div>
     </div>
   );
+}
+
+function estimateDeliveryLabel(planId) {
+  if (planId === "essential") return "5 días aprox.";
+  if (planId === "premium") return "7 días aprox.";
+  return "10 días aprox.";
 }
 
 function SelectGrid({ options, value, onChange }) {

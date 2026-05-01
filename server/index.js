@@ -89,13 +89,7 @@ function validateOrder(payload) {
   if (!payload.tone?.trim() && !payload.style?.trim()) errors.tone = "Selecciona un tono.";
   if (!payload.musicStyle?.trim() && !payload.style?.trim()) errors.musicStyle = "Selecciona un estilo musical.";
 
-  const cardNumber = String(payload.cardNumber || "").replace(/\D/g, "");
-  const cvc = String(payload.cvc || "").replace(/\D/g, "");
-  if (cardNumber.length < 12 || cardNumber.length > 19) errors.cardNumber = "Revisa el número de tarjeta.";
-  if (!/^\d{2}\/\d{2}$/.test(payload.expiry || "")) errors.expiry = "Usa formato MM/AA.";
-  if (cvc.length < 3 || cvc.length > 4) errors.cvc = "Revisa el CVC.";
-
-  return { errors, selectedPlan, cardLast4: cardNumber.slice(-4) };
+  return { errors, selectedPlan };
 }
 
 function emitOrderEvent(eventName, order) {
@@ -108,7 +102,7 @@ function emitOrderEvent(eventName, order) {
   // Canción lista, Solicitud de feedback, Recordatorio de formulario abandonado.
 }
 
-function normalizeOrder(payload, selectedPlan, cardLast4) {
+function normalizeOrder(payload, selectedPlan) {
   const now = new Date().toISOString();
   const order = {
     id: `ord_${crypto.randomUUID().slice(0, 8)}`,
@@ -129,21 +123,15 @@ function normalizeOrder(payload, selectedPlan, cardLast4) {
     selectedPlan: selectedPlan.id,
     planName: selectedPlan.name,
     price: selectedPlan.amount,
-    paymentStatus: "paid",
-    orderStatus: "payment_confirmed",
+    paymentStatus: "pending",
+    orderStatus: "received",
     estimatedDeliveryDate: addDays(now, selectedPlan.id === "essential" ? 5 : selectedPlan.id === "premium" ? 7 : 10),
     internalNotes: "",
+    songUrl: "",
     finalSongUrl: "",
     coverUrl: "",
-    payment: {
-      id: `pay_${crypto.randomUUID().slice(0, 8)}`,
-      provider: "Regala Música Demo Gateway",
-      status: "approved",
-      amount: selectedPlan.amount,
-      currency: "CLP",
-      cardLast4,
-      createdAt: now,
-    },
+    lyricVideoUrl: "",
+    payment: null,
     createdAt: now,
     updatedAt: now,
   };
@@ -154,19 +142,18 @@ function normalizeOrder(payload, selectedPlan, cardLast4) {
 async function createOrder(request, response) {
   try {
     const payload = await readBody(request);
-    const { errors, selectedPlan, cardLast4 } = validateOrder(payload);
+    const { errors, selectedPlan } = validateOrder(payload);
 
     if (Object.keys(errors).length) {
       sendJson(response, 422, { ok: false, errors });
       return;
     }
 
-    const order = normalizeOrder(payload, selectedPlan, cardLast4);
+    const order = normalizeOrder(payload, selectedPlan);
     const orders = await readOrders();
     orders.unshift(order);
     await saveOrders(orders);
     emitOrderEvent("order_created", order);
-    emitOrderEvent("payment_confirmed", order);
     sendJson(response, 201, { ok: true, order });
   } catch {
     sendJson(response, 400, { ok: false, message: "No pudimos procesar el pedido." });
@@ -194,13 +181,27 @@ async function updateOrder(request, response, orderId) {
     orderStatus: safeStatus,
     paymentStatus: safePaymentStatus,
     internalNotes: payload.internalNotes ?? current.internalNotes,
+    songUrl: payload.songUrl ?? payload.finalSongUrl ?? current.songUrl,
     finalSongUrl: payload.finalSongUrl ?? current.finalSongUrl,
     coverUrl: payload.coverUrl ?? current.coverUrl,
+    lyricVideoUrl: payload.lyricVideoUrl ?? current.lyricVideoUrl,
+    payment:
+      safePaymentStatus === "paid" && current.paymentStatus !== "paid"
+        ? {
+            id: `pay_${crypto.randomUUID().slice(0, 8)}`,
+            provider: "Regala Música Demo Gateway",
+            status: "approved",
+            amount: current.price,
+            currency: "CLP",
+            createdAt: new Date().toISOString(),
+          }
+        : current.payment,
     updatedAt: new Date().toISOString(),
   };
 
   orders[index] = updated;
   await saveOrders(orders);
+  if (safePaymentStatus === "paid" && current.paymentStatus !== "paid") emitOrderEvent("payment_confirmed", updated);
   if (safeStatus === "delivered") emitOrderEvent("order_delivered", updated);
   sendJson(response, 200, { ok: true, order: updated });
 }

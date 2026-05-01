@@ -1,0 +1,48 @@
+export const plans = [
+  {
+    id: "essential",
+    name: "Canción Esencial",
+    price: "Desde $19.990",
+    amount: 19990,
+    description: "Para un regalo simple, rápido y significativo.",
+    cta: "Elegir Esencial",
+    includes: [
+      "Canción personalizada basada en tu historia",
+      "Letra original personalizada",
+      "Elección de estilo musical",
+      "Entrega en MP3",
+      "1 versión final",
+    ],
+  },
+  {
+    id: "premium",
+    name: "Canción Premium",
+    badge: "Más elegido",
+    price: "Desde $34.990",
+    amount: 34990,
+    description: "Para quienes quieren un regalo más cuidado y emocionante.",
+    cta: "Elegir Premium",
+    includes: [
+      "Todo lo del plan Esencial",
+      "Revisión de letra antes de producir",
+      "Mejor dirección creativa del estilo",
+      "Portada digital simple",
+      "1 ajuste incluido",
+    ],
+  },
+  {
+    id: "experience",
+    name: "Canción Experiencia",
+    price: "Desde $54.990",
+    amount: 54990,
+    description: "Para convertir la canción en un regalo completo.",
+    cta: "Elegir Experiencia",
+    includes: [
+      "Todo lo del plan Premium",
+      "Video lyric simple",
+      "Dedicatoria escrita",
+      "Portada personalizada",
+      "2 ajustes incluidos",
+    ],
+  },
+];
