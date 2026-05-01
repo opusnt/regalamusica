@@ -189,10 +189,10 @@ export default function ChatForm() {
                     La canción empieza con una historia real. Lo siguiente es convertirla en una entrega que se sienta imposible de olvidar.
                   </p>
                   <a
-                    href="#final"
+                    href="#checkout"
                     className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-accent px-5 py-3 text-base font-semibold text-night transition-colors duration-300 hover:bg-[#ffd46a]"
                   >
-                    Crear mi canción
+                    Ir a pago
                     <Send className="size-4" aria-hidden="true" />
                   </a>
                 </motion.div>
